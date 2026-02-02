@@ -55,37 +55,67 @@ feistly.decrypt("user", "7nX4kP2mQ");  // → "12345"
 
 ## Why Feistly?
 
-### 🛡️ Security First
+**Hashids/Sqids are reversible encodings, not encryption. Feistly uses cryptography.**
 
-Built on **Feistel cipher** (the same cryptographic structure as DES/3DES) with HMAC-SHA256:
+| What you need | Use this |
+|---------------|----------|
+| Short URLs only | Hashids/Sqids |
+| **Tamper-proof tokens that can't be forged** | **Feistly** |
+| **Security audit compliance** | **Feistly** |
+| **Prevent token reuse across domains** | **Feistly** |
 
-- **Tag-based validation** prevents token tampering
-- **Domain separation** ensures user tokens ≠ order tokens (even for same ID)
-- **No rainbow tables** - each domain uses a unique derived key
-- **Zero collision risk** - format-preserving encryption guarantees 1:1 mapping
-
-### ⚡ Production Ready
-
-- **Zero dependencies** (Node.js crypto only)
-- **TypeScript native** with full type safety
-- **60K+ ops/sec** encryption/decryption throughput
-- **Zero database changes** - works with existing auto-increment IDs
-- **Stable tokens** - same ID always produces the same token
-
-### 🎯 Developer Experience
+### 🔐 Real Cryptography
 
 ```ts
-// Multi-domain support out of the box
+// Hashids: Anyone can decode your tokens
+const hashids = new Hashids('salt');
+const hash = hashids.encode(12345);  // No validation - reversible encoding
+
+// Feistly: Cryptographically secured with tag validation
+const token = feistly.encrypt('user', 12345);  // Feistel cipher + HMAC-SHA256
+feistly.decrypt('user', token);  // ✅ Valid
+feistly.decrypt('order', token); // ❌ Throws - domain mismatch detected
+```
+
+**What makes it secure:**
+- **Feistel cipher** (same structure as DES/3DES) - not just obfuscation
+- **HMAC-SHA256 tags** - tampered tokens are rejected immediately
+- **Domain separation** - user tokens ≠ order tokens, even for ID `100`
+- **Format-preserving** - no collisions, perfect 1:1 mapping
+
+### ⚡ Zero-Compromise Design
+
+```ts
+// Drop-in replacement for auto-increment IDs
+const user = await db.users.findById(12345);
+const publicToken = feistly.encrypt("user", user.id);  // ~60K ops/sec
+
+// In your API response
+res.json({ id: publicToken });  // URL-safe, tamper-resistant
+```
+
+- **Zero dependencies** - only Node.js built-in crypto
+- **Zero schema changes** - keep your auto-increment IDs
+- **Zero configuration** - works with TypeScript out of the box
+- **Deterministic** - same ID always generates the same token
+
+### 🎯 Built for Production
+
+```ts
+// Multi-domain support without extra keys
 feistly.encrypt("user", 100);     // → "xY9kP2mQ"
 feistly.encrypt("order", 100);    // → "dF3vN8rT"  (different!)
+feistly.encrypt("invoice", 100);  // → "kL8wM3nP"  (different!)
 
-// Validation without decryption
-feistly.verify("user", token);    // → true/false
+// Validate before decrypting (prevents timing attacks)
+if (!feistly.verify("user", token)) {
+  throw new UnauthorizedError();
+}
 
-// Custom alphabets for human-friendly tokens
-const feistly = new Feistly({
+// Custom alphabets for human-readable codes
+const promo = new Feistly({
   masterKey: key,
-  alphabet: "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"  // No 0/O/I/1
+  alphabet: "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"  // No 0/O/I/1 confusion
 });
 ```
 
