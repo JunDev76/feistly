@@ -11,6 +11,15 @@ importers:
       '@types/node':
         specifier: ^20.11.30
         version: 20.19.30
+      hashids:
+        specifier: ^2.3.0
+        version: 2.3.0
+      optimus-js:
+        specifier: ^0.1.4
+        version: 0.1.4
+      sqids:
+        specifier: ^0.3.0
+        version: 0.3.0
       tsx:
         specifier: ^4.16.2
         version: 4.21.0
@@ -192,8 +201,21 @@ packages:
   get-tsconfig@4.13.1:
     resolution: {integrity: sha512-EoY1N2xCn44xU6750Sx7OjOIT59FkmstNc3X6y5xpz7D5cBtZRe/3pSlTkDJgqsOk3WwZPkWfonhhUJfttQo3w==}
 
+  hashids@2.3.0:
+    resolution: {integrity: sha512-ljM73TE/avEhNnazxaj0Dw3BbEUuLC5yYCQ9RSkSUcT4ZSU6ZebdKCIBJ+xT/DnSYW36E9k82GH1Q6MydSIosQ==}
+
+  long@3.2.0:
+    resolution: {integrity: sha512-ZYvPPOMqUwPoDsbJaR10iQJYnMuZhRTvHYl62ErLIEX7RgFlziSBUUvrt3OVfc47QlHHpzPZYP17g3Fv7oeJkg==}
+    engines: {node: '>=0.6'}
+
+  optimus-js@0.1.4:
+    resolution: {integrity: sha512-9Pa2CbxRxwQbGD1d5ASaatINp1MgoYF7c2rg7oEBHs0jlT7ZwwcKxiPIz48WDMOTmwj7WsdTmsWDtQ7MYGo91Q==}
+
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
+
+  sqids@0.3.0:
+    resolution: {integrity: sha512-lOQK1ucVg+W6n3FhRwwSeUijxe93b51Bfz5PMRMihVf1iVkl82ePQG7V5vwrhzB11v0NtsR25PSZRGiSomJaJw==}
 
   tsx@4.21.0:
     resolution: {integrity: sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==}
@@ -328,7 +350,17 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
+  hashids@2.3.0: {}
+
+  long@3.2.0: {}
+
+  optimus-js@0.1.4:
+    dependencies:
+      long: 3.2.0
+
   resolve-pkg-maps@1.0.0: {}
+
+  sqids@0.3.0: {}
 
   tsx@4.21.0:
     dependencies:

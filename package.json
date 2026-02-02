@@ -1,7 +1,7 @@
 {
   "name": "feistly",
   "version": "0.1.0",
-  "description": "Feistel-based format-preserving obfuscation for auto-increment keys",
+  "description": "Secure, lightweight library for obfuscating auto-increment IDs with Feistel cipher - prevents ID enumeration attacks while keeping URLs short",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,19 +12,48 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "compare": "tsx scripts/compare.ts",
     "dev:example": "tsx examples/basic.ts",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "test": "node --test --import tsx"
   },
+  "keywords": [
+    "feistel",
+    "obfuscation",
+    "encryption",
+    "id-obfuscation",
+    "auto-increment",
+    "security",
+    "url-shortener",
+    "format-preserving",
+    "hashids-alternative",
+    "sqids-alternative"
+  ],
+  "author": "JANGWOOJOON <im@woojun.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jundev76/feistly.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jundev76/feistly/issues"
+  },
+  "homepage": "https://github.com/jundev76/feistly#readme",
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
+    "hashids": "^2.3.0",
+    "optimus-js": "^0.1.4",
+    "sqids": "^0.3.0",
     "tsx": "^4.16.2",
     "typescript": "^5.6.3"
   }

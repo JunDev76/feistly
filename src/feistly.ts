@@ -3,6 +3,34 @@ import crypto from "crypto";
 export const DEFAULT_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const MAX_UINT64 = 0xffffffffffffffffn;
 
+export class FeistlyError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FeistlyError";
+  }
+}
+
+export class InvalidConfigError extends FeistlyError {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidConfigError";
+  }
+}
+
+export class InvalidIdError extends FeistlyError {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidIdError";
+  }
+}
+
+export class InvalidTokenError extends FeistlyError {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidTokenError";
+  }
+}
+
 export type FeistlyConfig = {
   masterKey: string;
   rounds?: number;
@@ -27,11 +55,19 @@ function normalizeOptions(base: FeistlyOptions, overrides?: FeistlyOptions): Nor
   const alphabet = merged.alphabet ?? DEFAULT_ALPHABET;
   const minLength = merged.minLength ?? 0;
 
-  if (!Number.isInteger(rounds) || rounds <= 0) throw new Error("rounds must be a positive integer");
-  if (!Number.isInteger(tagLength) || tagLength <= 0) throw new Error("tagLength must be a positive integer");
-  if (!Number.isInteger(minLength) || minLength < 0) throw new Error("minLength must be a non-negative integer");
-  if (alphabet.length < 2) throw new Error("alphabet must have at least 2 characters");
-  if (new Set(alphabet).size !== alphabet.length) throw new Error("alphabet must contain unique characters");
+  if (!Number.isInteger(rounds) || rounds <= 0) {
+    throw new InvalidConfigError("rounds must be a positive integer");
+  }
+  if (!Number.isInteger(tagLength) || tagLength <= 0) {
+    throw new InvalidConfigError("tagLength must be a positive integer");
+  }
+  if (!Number.isInteger(minLength) || minLength < 0) {
+    throw new InvalidConfigError("minLength must be a non-negative integer");
+  }
+  if (alphabet.length < 2) throw new InvalidConfigError("alphabet must have at least 2 characters");
+  if (new Set(alphabet).size !== alphabet.length) {
+    throw new InvalidConfigError("alphabet must contain unique characters");
+  }
 
   return { rounds, tagLength, alphabet, minLength };
 }
@@ -41,22 +77,22 @@ function toUint64(value: string | number | bigint): bigint {
   if (typeof value === "bigint") {
     v = value;
   } else if (typeof value === "number") {
-    if (!Number.isInteger(value)) throw new Error("id must be an integer");
-    if (value < 0) throw new Error("id must be non-negative");
-    if (value > Number.MAX_SAFE_INTEGER) throw new Error("id exceeds MAX_SAFE_INTEGER");
+    if (!Number.isInteger(value)) throw new InvalidIdError("id must be an integer");
+    if (value < 0) throw new InvalidIdError("id must be non-negative");
+    if (value > Number.MAX_SAFE_INTEGER) throw new InvalidIdError("id exceeds MAX_SAFE_INTEGER");
     v = BigInt(value);
   } else {
-    if (!/^\d+$/.test(value)) throw new Error("id must be a numeric string");
+    if (!/^\d+$/.test(value)) throw new InvalidIdError("id must be a numeric string");
     v = BigInt(value);
   }
 
-  if (v < 0n || v > MAX_UINT64) throw new Error("id out of 64-bit range");
+  if (v < 0n || v > MAX_UINT64) throw new InvalidIdError("id out of 64-bit range");
   return v & MAX_UINT64;
 }
 
 function deriveKey(masterKey: string, domain: string): Buffer {
-  if (!masterKey) throw new Error("masterKey is required");
-  if (!domain) throw new Error("domain is required");
+  if (!masterKey) throw new InvalidConfigError("masterKey is required");
+  if (!domain) throw new InvalidConfigError("domain is required");
   return crypto.createHmac("sha256", Buffer.from(masterKey, "utf8")).update(`feistly:${domain}`).digest();
 }
 
@@ -103,7 +139,7 @@ function feistelDecrypt64(value: bigint, key: Buffer, rounds: number): bigint {
 }
 
 function baseEncode(value: bigint, alphabet: string, minLength = 0): string {
-  if (value < 0n) throw new Error("cannot encode negative values");
+  if (value < 0n) throw new InvalidIdError("cannot encode negative values");
   if (value === 0n) return alphabet[0].repeat(Math.max(1, minLength));
   const base = BigInt(alphabet.length);
   let v = value;
@@ -118,12 +154,12 @@ function baseEncode(value: bigint, alphabet: string, minLength = 0): string {
 }
 
 function baseDecode(text: string, alphabet: string): bigint {
-  if (!text) throw new Error("invalid token body");
+  if (!text) throw new InvalidTokenError("invalid token body");
   const base = BigInt(alphabet.length);
   let v = 0n;
   for (let i = 0; i < text.length; i++) {
     const idx = alphabet.indexOf(text[i]);
-    if (idx === -1) throw new Error("invalid character in token");
+    if (idx === -1) throw new InvalidTokenError("invalid character in token");
     v = v * base + BigInt(idx);
   }
   return v;
@@ -168,13 +204,13 @@ export class Feistly {
 
   decrypt(domain: string, token: string, options?: FeistlyOptions): string {
     const opts = normalizeOptions(this.baseOptions, options);
-    if (!token || token.length <= opts.tagLength) throw new Error("malformed token");
+    if (!token || token.length <= opts.tagLength) throw new InvalidTokenError("malformed token");
     const key = deriveKey(this.masterKey, domain);
     const tag = token.slice(0, opts.tagLength);
     const body = token.slice(opts.tagLength);
     const cipher64 = baseDecode(body, opts.alphabet);
     const expected = computeTag(key, cipher64, opts.alphabet, opts.tagLength);
-    if (tag !== expected) throw new Error("invalid key or token");
+    if (tag !== expected) throw new InvalidTokenError("invalid key or token");
     const plain64 = feistelDecrypt64(cipher64, key, opts.rounds);
     return plain64.toString(10);
   }
