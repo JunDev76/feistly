@@ -6,5 +6,5 @@ export {
   InvalidConfigError,
   InvalidIdError,
   InvalidTokenError,
-} from "./feistly";
-export type { FeistlyConfig, FeistlyOptions } from "./feistly";
+} from "./feistly.cjs";
+export type { FeistlyConfig, FeistlyOptions } from "./feistly.cjs";

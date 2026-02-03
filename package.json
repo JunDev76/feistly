@@ -3,13 +3,14 @@
   "version": "0.1.2",
   "description": "Secure, lightweight library for obfuscating auto-increment IDs with Feistel cipher - prevents ID enumeration attacks while keeping URLs short",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -19,7 +20,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/rename-cjs.mjs",
+    "build": "tsc -p tsconfig.json",
     "compare": "tsx scripts/compare.ts",
     "dev:example": "tsx examples/basic.ts",
     "prepublishOnly": "pnpm build",
