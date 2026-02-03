@@ -1,6 +1,6 @@
 {
   "name": "feistly",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Secure, lightweight library for obfuscating auto-increment IDs with Feistel cipher - prevents ID enumeration attacks while keeping URLs short",
   "type": "module",
   "main": "./dist/index.js",
